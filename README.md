@@ -21,7 +21,42 @@ A structured health-data example provides an accessible way to study end-to-end 
 
 ## System architecture
 
-![HeartDiseaseNN system architecture](docs/architecture-overview.svg)
+```mermaid
+flowchart TB
+    Upload["Colab CSV upload"]
+
+    subgraph Preparation["Tabular preparation"]
+        Filter["Keep binary HeartDisease target"]
+        Encode["One-hot encode categorical features"]
+        Scale["StandardScaler on numeric features"]
+        Split["Stratified train / validation split"]
+        Filter --> Encode --> Scale --> Split
+    end
+
+    subgraph Network["Keras Sequential model"]
+        Input["Prepared feature vector"]
+        DenseA["Dense • ReLU"]
+        DropA["Dropout"]
+        DenseB["Dense • ReLU"]
+        DropB["Dropout"]
+        Output["Sigmoid binary output"]
+        Input --> DenseA --> DropA --> DenseB --> DropB --> Output
+    end
+
+    subgraph Review["Notebook analysis"]
+        Curves["Training-history plots"]
+        Classification["Confusion matrix and classification report"]
+        Importance["Permutation feature importance"]
+        NewData["Second uploaded CSV for prediction"]
+    end
+
+    Upload --> Filter
+    Split --> Input
+    Output --> Curves
+    Output --> Classification
+    Output --> Importance
+    NewData --> Encode
+```
 
 ### How the workflow operates
 
